@@ -1,17 +1,11 @@
 import * as THREE from 'three';
 import { useMemo } from 'react';
-import { CSG, Geometry, Base } from '@react-three/csg';
 import { Wall, Door, Window } from '@/lib/types';
 
 interface WallWithOpeningsProps {
   wall: Wall;
   openings: (Door | Window)[];
 }
-
-// Helper to create a box geometry
-const createBox = (width: number, height: number, depth: number) => {
-  return new THREE.BoxGeometry(width, height, depth);
-};
 
 const WallWithOpenings = ({ wall }: WallWithOpeningsProps) => {
   const { start, end, height, thickness } = wall;
@@ -40,6 +34,12 @@ const WallWithOpenings = ({ wall }: WallWithOpeningsProps) => {
 
 // NOTE: A full CSG implementation would look something like this:
 /*
+import { CSG, Geometry, Base } from '@react-three/csg';
+
+const createBox = (width: number, height: number, depth: number) => {
+  return new THREE.BoxGeometry(width, height, depth);
+};
+
 const WallWithOpeningsCSG = ({ wall, openings }: WallWithOpeningsProps) => {
   const { start, end, height, thickness } = wall;
   const wallVector = new THREE.Vector2(end[0] - start[0], end[1] - start[1]);

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { SceneObject, EditorMode, ActiveTool, Wall } from './types';
+import { SceneObject, EditorMode, ActiveTool } from './types';
 
 interface AppState {
   sceneObjects: SceneObject[];
@@ -47,7 +47,7 @@ const useStore = create<AppState & AppActions>()(subscribeWithSelector((set, get
   updateObject: (id, updates) => {
     set((state) => {
       const newSceneObjects = state.sceneObjects.map((obj) =>
-        obj.id === id ? { ...obj, ...updates } : obj
+        obj.id === id ? ({ ...obj, ...updates } as SceneObject) : obj
       );
       const newPast = [...state.history.past, state.sceneObjects];
       return { sceneObjects: newSceneObjects, history: { past: newPast, future: [] } };

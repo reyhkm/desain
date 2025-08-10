@@ -1,20 +1,23 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Grid } from '@react-three/drei';
 import useStore from '@/lib/store';
-import { Wall, SceneObject } from '@/lib/types';
+import { Wall, Door, Window } from '@/lib/types';
 import WallWithOpenings from '../core/WallWithOpenings';
 import Furniture from '../core/Furniture';
 
 const Scene = () => {
   const sceneObjects = useStore((state) => state.sceneObjects);
 
-  const walls = sceneObjects.filter(obj => obj.type === 'wall') as Wall[];
+  const walls = sceneObjects.filter((obj): obj is Wall => obj.type === 'wall');
   const otherObjects = sceneObjects.filter(obj => obj.type !== 'wall');
 
   return (
     <>
       {walls.map(wall => {
-        const openings = otherObjects.filter(obj => (obj.type === 'door' || obj.type === 'window') && obj.wallId === wall.id);
+        const openings = sceneObjects.filter(
+          (obj): obj is Door | Window =>
+            (obj.type === 'door' || obj.type === 'window') && obj.wallId === wall.id
+        );
         return <WallWithOpenings key={wall.id} wall={wall} openings={openings} />;
       })}
 

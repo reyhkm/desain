@@ -2,7 +2,7 @@ import useStore from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Viewfinder, Undo, Redo, Save, FolderOpen, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Scan, Undo, Redo, Save, FolderOpen, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 const TopToolbar = () => {
   const { currentMode, setMode, undo, redo, saveState, loadState } = useStore();
@@ -16,11 +16,11 @@ const TopToolbar = () => {
         <ToggleGroup type="single" value={currentMode} onValueChange={(value) => value && setMode(value as '2D' | '3D')}>
           <ToggleGroupItem value="2D" aria-label="2D Mode">
             <span className="mr-2">2D</span>
-            <Viewfinder className="h-4 w-4" />
+            <Scan className="h-4 w-4" />
           </ToggleGroupItem>
           <ToggleGroupItem value="3D" aria-label="3D Mode">
             <span className="mr-2">3D</span>
-            <Viewfinder className="h-4 w-4" />
+            <Scan className="h-4 w-4" />
           </ToggleGroupItem>
         </ToggleGroup>
 
