@@ -3,6 +3,7 @@ import useStore from '@/lib/store';
 import { Wall } from '@/lib/types';
 
 const GRID_SIZE = 20;
+const SNAP_THRESHOLD = 10; // pixels for snapping
 
 const Canvas2D = () => {
   const {
@@ -23,15 +24,33 @@ const Canvas2D = () => {
     pt.x = e.clientX;
     pt.y = e.clientY;
     const svgP = pt.matrixTransform(svgRef.current.getScreenCTM()?.inverse());
-    return [Math.round(svgP.x / GRID_SIZE) * GRID_SIZE, Math.round(svgP.y / GRID_SIZE) * GRID_SIZE];
+    return [svgP.x, svgP.y];
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePos(getSvgCoordinates(e));
+    let [x, z] = getSvgCoordinates(e);
+
+    if (drawingWall) {
+      // Check for horizontal/vertical snap from start point
+      const [startX, startZ] = drawingWall;
+      if (Math.abs(x - startX) < SNAP_THRESHOLD) {
+        x = startX; // Snap vertically
+      }
+      if (Math.abs(z - startZ) < SNAP_THRESHOLD) {
+        z = startZ; // Snap horizontally
+      }
+    }
+
+    // Always snap to grid as the final step
+    const finalX = Math.round(x / GRID_SIZE) * GRID_SIZE;
+    const finalZ = Math.round(z / GRID_SIZE) * GRID_SIZE;
+
+    setMousePos([finalX, finalZ]);
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    const [x, z] = getSvgCoordinates(e);
+  const handleClick = () => {
+    // Use the already-snapped mousePos for the click action
+    const [x, z] = mousePos;
 
     if (activeTool === 'wall') {
       if (!drawingWall) {
@@ -45,25 +64,32 @@ const Canvas2D = () => {
           height: 100,
           position: [0, 0, 0], // Position is not used for walls in 2D
         };
-        addObject(newWall);
+        // Avoid creating zero-length walls
+        if (drawingWall[0] !== x || drawingWall[1] !== z) {
+          addObject(newWall);
+        }
         setDrawingWall(null);
       }
     } else if (activeTool === 'select') {
-      // Basic selection logic - find the clicked object
-      // This is a simplified implementation. A real app would need more robust hit detection.
-      const clickedObject = sceneObjects.find(obj => {
-        if (obj.type === 'wall') {
-          // Simple bounding box check for walls
-          const minX = Math.min(obj.start[0], obj.end[0]);
-          const maxX = Math.max(obj.start[0], obj.end[0]);
-          const minZ = Math.min(obj.start[1], obj.end[1]);
-          const maxZ = Math.max(obj.start[1], obj.end[1]);
-          return x >= minX - 5 && x <= maxX + 5 && z >= minZ - 5 && z <= maxZ + 5;
-        }
-        return false;
-      });
-      setSelectedObject(clickedObject ? clickedObject.id : null);
+      // Deselect if clicking on the background
+      setSelectedObject(null);
     }
+  };
+
+  const renderSnapGuide = () => {
+    if (!drawingWall) return null;
+
+    const [startX, startZ] = drawingWall;
+    const [currentX, currentZ] = mousePos;
+
+    // If perfectly aligned (due to snapping), show a guide
+    if (startX === currentX && startZ !== currentZ) {
+      return <line x1={startX} y1={startZ} x2={currentX} y2={currentZ} stroke="rgba(255, 0, 255, 0.7)" strokeWidth="1" strokeDasharray="3,3" className="pointer-events-none" />;
+    }
+    if (startZ === currentZ && startX !== currentX) {
+      return <line x1={startX} y1={startZ} x2={currentX} y2={currentZ} stroke="rgba(255, 0, 255, 0.7)" strokeWidth="1" strokeDasharray="3,3" className="pointer-events-none" />;
+    }
+    return null;
   };
 
   return (
@@ -73,6 +99,7 @@ const Canvas2D = () => {
       height="100%"
       onClick={handleClick}
       onMouseMove={handleMouseMove}
+      onMouseLeave={() => setDrawingWall(null)} // Cancel drawing if mouse leaves
       className="cursor-crosshair bg-white"
     >
       {/* Grid Pattern */}
@@ -97,10 +124,19 @@ const Canvas2D = () => {
             stroke={isSelected ? 'blue' : 'black'}
             strokeWidth={wall.thickness / 2}
             strokeLinecap="round"
-            className="pointer-events-none"
+            onClick={(e) => {
+              if (activeTool === 'select') {
+                e.stopPropagation(); // Prevent svg click handler from deselecting
+                setSelectedObject(wall.id);
+              }
+            }}
+            className={activeTool === 'select' ? 'cursor-pointer' : 'pointer-events-none'}
           />
         );
       })}
+
+      {/* Render Snap Guide */}
+      {renderSnapGuide()}
 
       {/* Render wall being drawn */}
       {drawingWall && (
@@ -112,6 +148,7 @@ const Canvas2D = () => {
           stroke="rgba(0,0,255,0.5)"
           strokeWidth="5"
           strokeDasharray="5,5"
+          className="pointer-events-none"
         />
       )}
     </svg>

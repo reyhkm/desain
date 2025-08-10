@@ -3,7 +3,8 @@ import { ActiveTool } from "@/lib/types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MousePointer, PenSquare, DoorOpen, RectangleHorizontal, Sofa } from 'lucide-react';
+import { MousePointer, PenSquare, DoorOpen, RectangleHorizontal, Sofa, Trash2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const tools: { name: ActiveTool; icon: React.ReactNode }[] = [
   { name: 'select', icon: <MousePointer /> },
@@ -14,8 +15,15 @@ const tools: { name: ActiveTool; icon: React.ReactNode }[] = [
 ];
 
 const Sidebar = () => {
-  const { activeTool, setTool, selectedObjectId, sceneObjects } = useStore();
+  const { activeTool, setTool, selectedObjectId, sceneObjects, removeObject, setSelectedObject } = useStore();
   const selectedObject = sceneObjects.find(obj => obj.id === selectedObjectId);
+
+  const handleDelete = () => {
+    if (selectedObjectId) {
+      removeObject(selectedObjectId);
+      setSelectedObject(null); // Deselect after deleting
+    }
+  };
 
   return (
     <aside className="w-72 bg-card border-r p-4 flex flex-col gap-4">
@@ -43,8 +51,13 @@ const Sidebar = () => {
       <Separator />
 
       <Card className="flex-1">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between p-6 pb-2">
           <CardTitle>Properties</CardTitle>
+          {selectedObject && (
+            <Button variant="destructive" size="icon" onClick={handleDelete} aria-label="Delete object">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {selectedObject ? (
