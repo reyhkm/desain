@@ -64,7 +64,9 @@ const Sidebar = () => {
             <div>
               <p><span className="font-bold">ID:</span> {selectedObject.id.substring(0, 8)}</p>
               <p><span className="font-bold">Type:</span> {selectedObject.type}</p>
-              <p><span className="font-bold">Position:</span> {JSON.stringify(selectedObject.position)}</p>
+              {'position' in selectedObject && selectedObject.position && (
+                <p><span className="font-bold">Position:</span> {JSON.stringify(selectedObject.position)}</p>
+              )}
               {/* Add more specific properties here based on object type */}
             </div>
           ) : (

@@ -5,7 +5,6 @@ export type SceneObject = Wall | Door | Window | Furniture;
 export interface BaseObject {
   id: string;
   type: 'wall' | 'door' | 'window' | 'furniture';
-  position: Vector3; // Center position for furniture, start point for wall
 }
 
 export interface Wall extends BaseObject {
@@ -18,6 +17,7 @@ export interface Wall extends BaseObject {
 
 export interface Door extends BaseObject {
   type: 'door';
+  position: Vector3;
   width: number;
   height: number;
   wallId: string | null; // ID of the wall it's on
@@ -26,6 +26,7 @@ export interface Door extends BaseObject {
 
 export interface Window extends BaseObject {
   type: 'window';
+  position: Vector3;
   width: number;
   height: number;
   elevation: number; // height from the floor
@@ -35,6 +36,7 @@ export interface Window extends BaseObject {
 
 export interface Furniture extends BaseObject {
   type: 'furniture';
+  position: Vector3;
   model: string; // Identifier for the GLB model
   rotation: Vector3;
   scale: Vector3;

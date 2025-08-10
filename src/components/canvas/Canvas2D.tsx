@@ -62,7 +62,6 @@ const Canvas2D = () => {
           end: [x, z],
           thickness: 10,
           height: 100,
-          position: [0, 0, 0], // Position is not used for walls in 2D
         };
         // Avoid creating zero-length walls
         if (drawingWall[0] !== x || drawingWall[1] !== z) {
